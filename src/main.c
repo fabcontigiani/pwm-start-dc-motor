@@ -13,29 +13,26 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #define F_CPU 16000000L
-#define N_STEPS 16 // 16 cycles = 1 ms -> T = 1ms => f = 1kHz
+#define T_OUTPUT 213 // us
 
-enum total_duration
+enum total_duration // number of steps = total time / 213us
 {
     // on each step we increment by 1 cycle the HIGH duration of the output
-    // signal, every period has 16 cycles, thus we can do 16 steps in total
-    T1 = 312, // * 16 steps =~ 5000ms
-    T2 = 500, // * 16 steps =~ 8000ms
-    T3 = 687, // * 16 steps =~ 11000ms
-    T4 = 875  // * 16 steps =~ 14000ms
-    // these are the number of times we need to repeat the sequence 
-    // of a given step for each total duration
-    // considering an output pwm signal with period 1ms
+    // signal
+    T1 = 23474,
+    T2 = 37559,
+    T3 = 51643,
+    T4 = 65535
 };
 
 enum leds
 {
-    LED1 = 8,   // PD7
-    LED2 = 7,   // PD6
-    LED3 = 6,   // PD5
-    LED4 = 5,   // PD4
-    LED5 = 4,   // PD3
-    LEDpwm = 1  // PD0
+    LED1 = PORTD7,
+    LED2 = PORTD6,
+    LED3 = PORTD5,
+    LED4 = PORTD4,
+    LED5 = PORTD3,
+    LEDpwm = PORTD0
 };
 
 void switch_off();
@@ -53,15 +50,24 @@ int main(void)
 
     // Pins PC3, PC4, PC5 will be receiving data from external switches
     // setup internal pull ups
-    PORTC = (1 << 3) | (1 << 4) | (1 << 5);
+    PORTC = (1 << PORTC3) | (1 << PORTC4) | (1 << PORTC5);
 
     while (1)
     {
-        if (!(PINC & (1 << 4)))
+        if (!(PINC & (1 << PORTC4)))
             cycle_duration();
 
-        if (!(PINC & (1 << 5)))
-            pwm_start();
+        if (!(PINC & (1 << PORTC5)))
+        {
+            if (intertal_state)
+            {
+                switch_off();
+            }
+            else
+            {
+                pwm_start();
+            }
+        }
 
         // TODO: Hardware interrupt based switch on/off
     }
@@ -107,20 +113,25 @@ void cycle_duration()
 
 void pwm_start()
 {
-    if (intertal_state)
-    {
-        switch_off();
-        return;
-    }
-
-    for (int step = 0; step < N_STEPS; step++)
+    for (int step = 0; step < T_OUTPUT; step++)
     {
         for (int i = 0; i < selected_duration; i++)
         {
             PORTD |= (1 << LEDpwm);
-            _delay_us(step * 62); // 1 cycle = 62.5us
-            PORTD |= (1 << LEDpwm);
-            _delay_us(step * 62);
+            int j = step;
+            while (j != 0)
+            {
+                _delay_us(1);
+                j--;
+            }
+            PORTD ^= (1 << LEDpwm);
+            j = T_OUTPUT - step;
+            while (j != 0)
+            {
+                _delay_us(1);
+                j--;
+            }
+            // TODO: fix delay overhead
         }
 
         if (step < 4) // less than 25% progress

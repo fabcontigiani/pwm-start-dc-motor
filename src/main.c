@@ -1,13 +1,13 @@
 /******************** Pins ****************************
- * PC3: Input, on/off switch, pwm start
- * PC4: Input, cycle through possible durations
- * PC5: Input, on/off switch, hardware interrupt
- * PD7: Output, LED1
- * PD6: Output, LED2
- * PD5: Output, LED3
- * PD4: Output, LED4
- * PD3: Output, LED5
- * PD0: Output, LEDpwm
+ * PD0: Input, on/off switch, slow start
+ * PD1: Input, cycle through possible durations
+ * PD2: Input, on/off switch, external interrupt
+ * PC0: Output, LED1
+ * PC1: Output, LED2
+ * PC2: Output, LED3
+ * PC3: Output, LED4
+ * PC4: Output, LED5
+ * PC5: Output, LEDpwm
  *****************************************************/
 
 #include <avr/io.h>
@@ -25,13 +25,12 @@
 #define T3 (11000 / T_OUTPUT) / N_STEPS
 #define T4 (14000 / T_OUTPUT) / N_STEPS
 
-#define LED1 PORTD7
-#define LED2 PORTD6
-#define LED3 PORTD5
-#define LED4 PORTD4
-#define LED5 PORTD3
-#define LEDpwm PORTD0
-
+#define LED1 PORTC0
+#define LED2 PORTC1
+#define LED3 PORTC2
+#define LED4 PORTC3
+#define LED5 PORTC4
+#define LEDpwm PORTC5
 void cycle_duration();
 void pwm_start();
 
@@ -40,20 +39,29 @@ volatile int intertal_state = 0; // 0 = off; 1 = on
 
 int main(void)
 {
-    // make the whole PORTD outputs and set LOW
-    DDRD = 0xFF;
-    PORTD = 0;
+    // make the whole PORTC outputs and set LOW
+    DDRC = 0xFF;
+    PORTC = 0x00;
 
-    // Pins PC3, PC4, PC5 will be receiving data from external switches
+    // Pins PD0, PD1, PD2 will be receiving data from external switches
     // setup internal pull ups
-    PORTC = (1 << PORTC3) | (1 << PORTC4) | (1 << PORTC5);
+    PORTD = (1 << PORTD0) | (1 << PORTD1) | (1 << PORTD2);
+
 
     while (1)
     {
-        if (!(PINC & (1 << PORTC4)))
+        if (!(PIND & (1 << PORTD0)))
         {
-            _delay_ms(6);
-            if (PINC & (1 << PORTC4))
+            _delay_ms(10);
+            if (PIND & (1 << PORTD0))
+                break;
+            pwm_start();
+        }
+
+        if (!(PIND & (1 << PORTD1)))
+        {
+            _delay_ms(10);
+            if (PIND & (1 << PORTD1))
                 break;
             cycle_duration();
         }
@@ -115,12 +123,12 @@ void pwm_start()
     {
         for (int j = 0; j < selected_duration; j++)
         {
-            PORTD |= (1 << LEDpwm);
+            PORTC |= (1 << LEDpwm);
             for (int k = 0; k < i; k++)
             {
                 _delay_ms(1);
             }
-            PORTD &= ~(1 << LEDpwm);
+            PORTC &= ~(1 << LEDpwm);
             for (int k = 0; k <= (N_STEPS - i); k++)
             {
                 _delay_ms(1);
@@ -128,15 +136,15 @@ void pwm_start()
         }
 
         if (i < PCT25) // less than 25% progress
-            PORTD |= (1 << LED1);
+            PORTC |= (1 << LED1);
         else if (i < PCT50) // less than 50% progress
-            PORTD |= (1 << LED2);
+            PORTC |= (1 << LED2);
         else if (i < PCT75) // less than 75% progress
-            PORTD |= (1 << LED3);
+            PORTC |= (1 << LED3);
         else // more than 75% progress
-            PORTD |= (1 << LED4);
+            PORTC |= (1 << LED4);
     }
     // pwm start process finished
     // turn on LED5 and LEDpwm
-    PORTD |= (1 << LED5) | (1 << LEDpwm);
+    PORTC |= (1 << LED5) | (1 << LEDpwm);
 }

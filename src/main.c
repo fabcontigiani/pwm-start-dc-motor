@@ -31,6 +31,10 @@
 #define LED4 PORTC3
 #define LED5 PORTC4
 #define LEDpwm PORTC5
+
+void turn_on();
+void turn_off();
+void toggle_led_ms(int, int);
 void cycle_duration();
 void pwm_start();
 
@@ -78,44 +82,56 @@ int main(void)
     return 0;
 }
 
+void turn_on()
+{
+    PORTC = 0xFF;
+    intertal_state = 1;
+    _delay_ms(200);
+}
+
+void turn_off()
+{
+    PORTC = 0x00;
+    intertal_state = 0;
+    _delay_ms(200);
+}
+
+void toggle_led_ms(int led, int ms)
+{
+        PORTC ^= (1 << led);
+        _delay_ms(ms);
+        PORTC ^= (1 << led);
+
+}
+
 void cycle_duration()
 {
     switch (selected_duration)
     {
     case T1:
         selected_duration = T2;
-        PORTD ^= (1 << LED3);
-        _delay_ms(500);
-        PORTD ^= (1 << LED3);
+        toggle_led_ms(LED3, 500);
         break;
     case T2:
         selected_duration = T3;
-        PORTD ^= (1 << LED4);
-        _delay_ms(500);
-        PORTD ^= (1 << LED4);
+        toggle_led_ms(LED4, 500);
         break;
     case T3:
         selected_duration = T4;
-        PORTD ^= (1 << LED5);
-        _delay_ms(500);
-        PORTD ^= (1 << LED5);
+        toggle_led_ms(LED5, 500);
         break;
     case T4:
         selected_duration = T1;
-        PORTD ^= (1 << LED2);
-        _delay_ms(500);
-        PORTD ^= (1 << LED2);
+        toggle_led_ms(LED2, 500);
         break;
     }
 }
 
 void pwm_start()
 {
-    if (intertal_state)
+    if (intertal_state) // FIXME: starts again after turning off
     {
-        PORTD = 0;
-        intertal_state = 0;
-        _delay_ms(1000);
+        turn_off();
         return;
     }
     intertal_state = 1;

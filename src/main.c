@@ -40,7 +40,6 @@ enum leds
     LEDpwm = PORTD0
 };
 
-void switch_off();
 void cycle_duration();
 void pwm_start();
 
@@ -72,19 +71,11 @@ int main(void)
             _delay_ms(6);
             if (PINC & (1 << PORTC5))
                 break;
-                pwm_start();
-            }
+            pwm_start();
         }
-
         // TODO: Hardware interrupt based switch on/off
     }
     return 0;
-}
-
-void switch_off()
-{
-    PORTD = 0;
-    intertal_state = 0;
 }
 
 void cycle_duration()
@@ -120,25 +111,27 @@ void cycle_duration()
 
 void pwm_start()
 {
-    for (int step = 0; step < T_OUTPUT; step++)
+    if (intertal_state)
     {
-        for (int i = 0; i < selected_duration; i++)
+        PORTD = 0;
+        intertal_state = 0;
+        return;
+    }
+    intertal_state = 1;
+    for (int i = 0; i < N_STEPS; i++)
+    {
+        for (int j = 0; j < selected_duration; j++)
         {
             PORTD |= (1 << LEDpwm);
-            int j = step;
-            while (j != 0)
+            for (int k = 0; k < i; k++)
             {
-                _delay_us(1);
-                j--;
+                _delay_ms(1);
             }
-            PORTD ^= (1 << LEDpwm);
-            j = T_OUTPUT - step;
-            while (j != 0)
+            PORTD &= ~(1 << LEDpwm);
+            for (int k = 0; k < (N_STEPS - i); k++)
             {
-                _delay_us(1);
-                j--;
+                _delay_ms(1);
             }
-            // TODO: fix delay overhead
         }
 
         if (i < PCT25) // less than 25% progress

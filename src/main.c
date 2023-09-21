@@ -16,29 +16,21 @@
 #define T_OUTPUT 20 // ms
 #define N_STEPS 20
 
-unsigned int PCT25 = N_STEPS * 0.25;
-unsigned int PCT50 = N_STEPS * 0.50;
-unsigned int PCT75 = N_STEPS * 0.75;
+#define PCT25 N_STEPS * 0.25
+#define PCT50 N_STEPS * 0.50
+#define PCT75 N_STEPS * 0.75
 
-enum total_duration // number of steps = total time / N_STEPS
-{
-    // on each step we increment by 1 cycle the HIGH duration of the output
-    // signal
-    T1 = (5000 / T_OUTPUT) / N_STEPS,
-    T2 = (8000 / T_OUTPUT) / N_STEPS,
-    T3 = (11000 / T_OUTPUT) / N_STEPS,
-    T4 = (14000 / T_OUTPUT) / N_STEPS
-};
+#define T1 (5000 / T_OUTPUT) / N_STEPS
+#define T2 (8000 / T_OUTPUT) / N_STEPS
+#define T3 (11000 / T_OUTPUT) / N_STEPS
+#define T4 (14000 / T_OUTPUT) / N_STEPS
 
-enum leds
-{
-    LED1 = PORTD7,
-    LED2 = PORTD6,
-    LED3 = PORTD5,
-    LED4 = PORTD4,
-    LED5 = PORTD3,
-    LEDpwm = PORTD0
-};
+#define LED1 PORTD7
+#define LED2 PORTD6
+#define LED3 PORTD5
+#define LED4 PORTD4
+#define LED5 PORTD3
+#define LEDpwm PORTD0
 
 void cycle_duration();
 void pwm_start();

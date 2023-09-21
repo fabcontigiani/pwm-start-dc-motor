@@ -121,7 +121,7 @@ void pwm_start()
                 _delay_ms(1);
             }
             PORTD &= ~(1 << LEDpwm);
-            for (int k = 0; k < (N_STEPS - i); k++)
+            for (int k = 0; k <= (N_STEPS - i); k++)
             {
                 _delay_ms(1);
             }

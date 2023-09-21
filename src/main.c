@@ -89,25 +89,25 @@ void cycle_duration()
     case T1:
         selected_duration = T2;
         PORTD ^= (1 << LED3);
-        _delay_ms(1000);
+        _delay_ms(500);
         PORTD ^= (1 << LED3);
         break;
     case T2:
         selected_duration = T3;
         PORTD ^= (1 << LED4);
-        _delay_ms(1000);
+        _delay_ms(500);
         PORTD ^= (1 << LED4);
         break;
     case T3:
         selected_duration = T4;
         PORTD ^= (1 << LED5);
-        _delay_ms(1000);
+        _delay_ms(500);
         PORTD ^= (1 << LED5);
         break;
     case T4:
         selected_duration = T1;
         PORTD ^= (1 << LED2);
-        _delay_ms(1000);
+        _delay_ms(500);
         PORTD ^= (1 << LED2);
         break;
     }

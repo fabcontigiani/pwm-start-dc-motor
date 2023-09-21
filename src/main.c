@@ -107,6 +107,7 @@ void pwm_start()
     {
         PORTD = 0;
         intertal_state = 0;
+        _delay_ms(1000);
         return;
     }
     intertal_state = 1;

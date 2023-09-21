@@ -55,16 +55,18 @@ int main(void)
     while (1)
     {
         if (!(PINC & (1 << PORTC4)))
+        {
+            _delay_ms(6);
+            if (PINC & (1 << PORTC4))
+                break;
             cycle_duration();
+        }
 
         if (!(PINC & (1 << PORTC5)))
         {
-            if (intertal_state)
-            {
-                switch_off();
-            }
-            else
-            {
+            _delay_ms(6);
+            if (PINC & (1 << PORTC5))
+                break;
                 pwm_start();
             }
         }

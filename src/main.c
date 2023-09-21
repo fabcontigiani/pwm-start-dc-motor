@@ -13,16 +13,21 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #define F_CPU 16000000L
-#define T_OUTPUT 213 // us
+#define T_OUTPUT 20 // ms
+#define N_STEPS 20
 
-enum total_duration // number of steps = total time / 213us
+unsigned int PCT25 = N_STEPS * 0.25;
+unsigned int PCT50 = N_STEPS * 0.50;
+unsigned int PCT75 = N_STEPS * 0.75;
+
+enum total_duration // number of steps = total time / N_STEPS
 {
     // on each step we increment by 1 cycle the HIGH duration of the output
     // signal
-    T1 = 23474,
-    T2 = 37559,
-    T3 = 51643,
-    T4 = 65535
+    T1 = (5000 / T_OUTPUT) / N_STEPS,
+    T2 = (8000 / T_OUTPUT) / N_STEPS,
+    T3 = (11000 / T_OUTPUT) / N_STEPS,
+    T4 = (14000 / T_OUTPUT) / N_STEPS
 };
 
 enum leds
@@ -136,11 +141,11 @@ void pwm_start()
             // TODO: fix delay overhead
         }
 
-        if (step < 4) // less than 25% progress
+        if (i < PCT25) // less than 25% progress
             PORTD |= (1 << LED1);
-        else if (step < 8) // less than 50% progress
+        else if (i < PCT50) // less than 50% progress
             PORTD |= (1 << LED2);
-        else if (step < 12) // less than 75% progress
+        else if (i < PCT75) // less than 75% progress
             PORTD |= (1 << LED3);
         else // more than 75% progress
             PORTD |= (1 << LED4);
@@ -148,5 +153,4 @@ void pwm_start()
     // pwm start process finished
     // turn on LED5 and LEDpwm
     PORTD |= (1 << LED5) | (1 << LEDpwm);
-    intertal_state = 1;
 }

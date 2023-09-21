@@ -11,6 +11,7 @@
  *****************************************************/
 
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <util/delay.h>
 #define F_CPU 16000000L
 #define T_OUTPUT 20 // ms
@@ -40,6 +41,12 @@ void pwm_start();
 
 volatile int selected_duration = T1;
 volatile int intertal_state = 0; // 0 = off; 1 = on
+volatile int flag = 0;
+
+ISR(INT0_vect)
+{
+    flag = 1;
+}
 
 int main(void)
 {
@@ -51,6 +58,9 @@ int main(void)
     // setup internal pull ups
     PORTD = (1 << PORTD0) | (1 << PORTD1) | (1 << PORTD2);
 
+    EICRA = (1 << ISC01); // falling edge triggers interrupt
+    EIMSK = (1 << INT0);  // enable PD2 as external interrupt
+    sei();                // set external interrupt bit
 
     while (1)
     {
@@ -70,14 +80,14 @@ int main(void)
             cycle_duration();
         }
 
-        if (!(PINC & (1 << PORTC5)))
+        if (flag)
         {
-            _delay_ms(6);
-            if (PINC & (1 << PORTC5))
-                break;
-            pwm_start();
+            if (intertal_state)
+                turn_off();
+            else
+                turn_on();
+            flag = 0;
         }
-        // TODO: Hardware interrupt based switch on/off
     }
     return 0;
 }
@@ -148,6 +158,12 @@ void pwm_start()
             for (int k = 0; k <= (N_STEPS - i); k++)
             {
                 _delay_ms(1);
+            }
+            if (flag)
+            {
+                turn_off();
+                flag = 0;
+                return;
             }
         }
 

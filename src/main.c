@@ -139,7 +139,7 @@ void cycle_duration()
 
 void pwm_start()
 {
-    if (intertal_state) // FIXME: starts again after turning off
+    if (intertal_state)
     {
         turn_off();
         return;

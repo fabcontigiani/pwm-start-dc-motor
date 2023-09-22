@@ -40,7 +40,7 @@ void cycle_duration();
 void pwm_start();
 
 volatile int selected_duration = T1;
-volatile int intertal_state = 0; // 0 = off; 1 = on
+volatile int internal_state = 0; // 0 = off; 1 = on
 volatile int flag = 0;
 
 ISR(INT0_vect)
@@ -82,7 +82,7 @@ int main(void)
 
         if (flag)
         {
-            if (intertal_state)
+            if (internal_state)
                 turn_off();
             else
                 turn_on();
@@ -95,14 +95,14 @@ int main(void)
 void turn_on()
 {
     PORTC = 0xFF;
-    intertal_state = 1;
+    internal_state = 1;
     _delay_ms(200);
 }
 
 void turn_off()
 {
     PORTC = 0x00;
-    intertal_state = 0;
+    internal_state = 0;
     _delay_ms(200);
 }
 
@@ -139,12 +139,12 @@ void cycle_duration()
 
 void pwm_start()
 {
-    if (intertal_state)
+    if (internal_state)
     {
         turn_off();
         return;
     }
-    intertal_state = 1;
+    internal_state = 1;
     for (int i = 0; i < N_STEPS; i++)
     {
         for (int j = 0; j < selected_duration; j++)

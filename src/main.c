@@ -108,14 +108,14 @@ void turn_off()
 
 void toggle_led_1s(int led)
 {
-        PORTC ^= (1 << led);
+    PORTC ^= (1 << led);
     for (int i = 0; i < 5; i++)
     {
         _delay_ms(200);
         if (flag)
             return;
     }
-        PORTC ^= (1 << led);
+    PORTC ^= (1 << led);
 }
 
 void cycle_duration()

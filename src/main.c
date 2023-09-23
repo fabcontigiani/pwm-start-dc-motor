@@ -39,8 +39,8 @@ void toggle_led_1s(int);
 void cycle_duration();
 void pwm_start();
 
-volatile int selected_duration = T1;
-volatile int internal_state = 0; // 0 = off; 1 = on
+int selected_duration = T1;
+int internal_state = 0; // 0 = off; 1 = on
 volatile int flag = 0;
 
 ISR(INT0_vect)

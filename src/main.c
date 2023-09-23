@@ -35,7 +35,7 @@
 
 void turn_on();
 void turn_off();
-void toggle_led_ms(int, int);
+void toggle_led_1s(int);
 void cycle_duration();
 void pwm_start();
 
@@ -106,12 +106,16 @@ void turn_off()
     _delay_ms(200);
 }
 
-void toggle_led_ms(int led, int ms)
+void toggle_led_1s(int led)
 {
         PORTC ^= (1 << led);
-        _delay_ms(ms);
+    for (int i = 0; i < 5; i++)
+    {
+        _delay_ms(200);
+        if (flag)
+            return;
+    }
         PORTC ^= (1 << led);
-
 }
 
 void cycle_duration()
@@ -120,19 +124,27 @@ void cycle_duration()
     {
     case T1:
         selected_duration = T2;
-        toggle_led_ms(LED3, 500);
+        toggle_led_1s(LED3);
+        if (flag)
+            return;
         break;
     case T2:
         selected_duration = T3;
-        toggle_led_ms(LED4, 500);
+        toggle_led_1s(LED4);
+        if (flag)
+            return;
         break;
     case T3:
         selected_duration = T4;
-        toggle_led_ms(LED5, 500);
+        toggle_led_1s(LED5);
+        if (flag)
+            return;
         break;
     case T4:
         selected_duration = T1;
-        toggle_led_ms(LED2, 500);
+        toggle_led_1s(LED2);
+        if (flag)
+            return;
         break;
     }
 }
@@ -160,11 +172,7 @@ void pwm_start()
                 _delay_ms(1);
             }
             if (flag)
-            {
-                turn_off();
-                flag = 0;
                 return;
-            }
         }
 
         if (i < PCT25) // less than 25% progress

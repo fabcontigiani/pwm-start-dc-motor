@@ -64,6 +64,16 @@ int main(void)
 
     while (1)
     {
+        if (flag)
+        {
+            if (internal_state)
+                turn_off();
+            else
+                turn_on();
+            flag = 0;
+            continue;
+        }
+
         if (!(PIND & (1 << PORTD0)))
         {
             _delay_ms(10);
@@ -78,15 +88,6 @@ int main(void)
             if (PIND & (1 << PORTD1))
                 break;
             cycle_duration();
-        }
-
-        if (flag)
-        {
-            if (internal_state)
-                turn_off();
-            else
-                turn_on();
-            flag = 0;
         }
     }
     return 0;

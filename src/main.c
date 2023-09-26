@@ -16,6 +16,7 @@
 #define F_CPU 16000000L
 #define T_OUTPUT 20 // ms
 #define N_STEPS 20
+#define BOUNCE_DELAY 10 // ms
 
 #define PCT25 N_STEPS * 0.25
 #define PCT50 N_STEPS * 0.50
@@ -45,7 +46,9 @@ volatile int flag = 0;
 
 ISR(INT0_vect)
 {
-    flag = 1;
+    _delay_ms(5 * BOUNCE_DELAY);
+    if (!(PIND & (1 << PORTD2))) // PD2 still LOW
+        flag = 1;
 }
 
 int main(void)
@@ -54,13 +57,18 @@ int main(void)
     DDRC = 0xFF;
     PORTC = 0x00;
 
-    // Pins PD0, PD1, PD2 will be receiving data from external switches
+    // Pins PD0, PD1, PD2 will receive data from external switches
     // setup internal pull ups
     PORTD = (1 << PORTD0) | (1 << PORTD1) | (1 << PORTD2);
 
     EICRA = (1 << ISC01); // falling edge triggers interrupt
     EIMSK = (1 << INT0);  // enable PD2 as external interrupt
     sei();                // set external interrupt bit
+
+    int lastPD0State = 1;
+    int PD0State = 1;
+    int lastPD1State = 1;
+    int PD1State = 1;
 
     while (1)
     {
@@ -71,24 +79,37 @@ int main(void)
             else
                 turn_on();
             flag = 0;
+            _delay_ms(BOUNCE_DELAY);
             continue;
         }
 
-        if (!(PIND & (1 << PORTD0)))
+        PD0State = (PIND & (1 << PORTD0));
+        if (PD0State != lastPD0State) // Button state changed
         {
-            _delay_ms(10);
-            if (PIND & (1 << PORTD0))
-                break;
-            pwm_start();
+            if (!PD0State) // Button went from LOW to HIGH
+            {
+                _delay_ms(BOUNCE_DELAY);
+                if (!PD0State) // Button still LOW (avoid bouncing)
+                    pwm_start();
+            }
+            else
+                _delay_ms(200);
         }
+        lastPD0State = PD0State;
 
-        if (!(PIND & (1 << PORTD1)))
+        PD1State = (PIND & (1 << PORTD1));
+        if (PD1State != lastPD1State) // Button state changed
         {
-            _delay_ms(10);
-            if (PIND & (1 << PORTD1))
-                break;
-            cycle_duration();
+            if (!PD1State) // Button went from LOW to HIGH
+            {
+                _delay_ms(BOUNCE_DELAY);
+                if (!PD1State) // Button still LOW (avoid bouncing)
+                    cycle_duration();
+            }
+            else
+                _delay_ms(200);
         }
+        lastPD1State = PD1State;
     }
     return 0;
 }

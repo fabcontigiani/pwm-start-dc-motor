@@ -62,7 +62,7 @@ int main(void) {
     // Configurar PD0, PD1, PD2 como entradas con pull-ups internos
     PORTD = (1 << PORTD0) | (1 << PORTD1) | (1 << PORTD2);
 
-    // Configurar la configuración de interrupción externa
+    // Configurar la solicitud de interrupción externa
     EICRA = (1 << ISC01); // Flanco descendente activa la interrupción
     EIMSK = (1 << INT0);  // Habilitar PD2 como interrupción externa
     sei();                // Habilitar interrupciones globales
